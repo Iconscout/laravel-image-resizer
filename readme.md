@@ -1,0 +1,3 @@
+## About ImageResizer
+
+Laravel Image Resizer is a Laravel 5.5 Package for Image uploading, auto re-sizing and retrieving library. The package allows to define types of images and their directories to upload image, apply transformations on them using Intervention Image such as Crop and Rotate, and save different types of images (such as small, medium, large) using sync or push the job on to Laravel Queue and manage to filesystem storage.
