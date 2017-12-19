@@ -22,7 +22,6 @@
             "email": "tarun@iconscout.com"
         }
     ],
-    "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
             "Iconscout\\ImageResizer\\": "src"
