@@ -128,13 +128,13 @@ class ImageType
     public function putFile($file, string $filename = null)
     {
         if ($file instanceof UploadedFile) {
-            $this->filename = $this->getFileName($filename ? : $file->getClientOriginalName(), $file->getClientOriginalExtension());
+            $this->filename = $this->getFileName($filename, $file->getClientOriginalExtension());
             $originalImageFile = $this->putOriginalFile($file->getRealPath());
         } elseif (file_exists($file)) {
-            $this->filename = $this->getFileName($filename? : pathinfo($file, PATHINFO_FILENAME), pathinfo($file, PATHINFO_EXTENSION));
+            $this->filename = $this->getFileName($filename, pathinfo($file, PATHINFO_EXTENSION));
             $originalImageFile = $this->putOriginalFile($file);
         } elseif (filter_var($file, FILTER_VALIDATE_URL)) {
-            $this->filename = $this->getFileName($filename? : pathinfo($file, PATHINFO_FILENAME), pathinfo($file, PATHINFO_EXTENSION));
+            $this->filename = $this->getFileName($filename, pathinfo($file, PATHINFO_EXTENSION));
             $originalImageFile = $this->transferHTTPFile($file);
         } else {
             throw new InvalidInputException($file);
@@ -167,13 +167,17 @@ class ImageType
         return $this;
     }
 
-    public function url(string $filename, $sizes = [], $expirationTime = null)
+    public function url(string $filename = null, $sizes = [], $expirationTime = null)
     {
+        if (empty($filename)) {
+            return $this->defaultUrl($sizes);
+        }
+        
         $urls = [];
         $this->expirationTime = empty($expirationTime) ? $this->expirationTime : $expirationTime;
 
         if (empty($sizes) || in_array('original', $sizes)) {
-            $output = $this->typeConfig->get('original')['path'] . '/original/' . $filename;
+            $output = $this->typeConfig->get('original')['path'] . '/' . $filename;
 
             $storage = Storage::disk($this->originalFileDisk);
             if ($this->originalDiskConfig['driver'] === 'local' || empty($this->originalDiskConfig['private'])) {
@@ -195,13 +199,17 @@ class ImageType
         return $urls;
     }
 
-    public function temporaryUrl(string $filename, $sizes = [], $expirationTime = null)
+    public function temporaryUrl(string $filename = null, $sizes = [], $expirationTime = null)
     {
+        if (empty($filename)) {
+            return $this->defaultUrl($sizes);
+        }
+
         $urls = [];
         $this->expirationTime = empty($expirationTime) ? $this->expirationTime : $expirationTime;
 
         if (empty($sizes) || in_array('original', $sizes)) {
-            $output = $this->typeConfig->get('original')['path'] . '/original/' . $filename;
+            $output = $this->typeConfig->get('original')['path'] . '/' . $filename;
             $urls['original'] = Storage::disk($this->originalFileDisk)->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
         }
 
@@ -211,6 +219,27 @@ class ImageType
         foreach ($configSizes as $size => $dimensions) {
             if (empty($sizes) || in_array($size, $sizes)) {
                 $urls[$size] = $this->temporaryImageUrl($filename, $size, $dimensions);
+            }
+        }
+
+        return $urls;
+    }
+
+    public function defaultUrl($sizes = [])
+    {
+        $urls = [];
+        $output = $this->typeConfig->get('default');
+        $defaultUrl = Storage::disk('local')->url($output);
+
+        if (empty($sizes) || in_array('original', $sizes)) {
+            $urls['original'] = $defaultUrl;
+        }
+
+        $configSizes = $this->typeConfig->get('sizes');
+
+        foreach ($configSizes as $size => $dimensions) {
+            if (empty($sizes) || in_array($size, $sizes)) {
+                $urls[$size] = $defaultUrl;
             }
         }
 
@@ -238,5 +267,4 @@ class ImageType
         $output = $this->typeConfig->get('base')['path'] . '/' . $size . '/' . $filename['filename'] . '.' . $dimensions['extension'];
         return Storage::disk($this->baseFileDisk)->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
     }
-
 }
