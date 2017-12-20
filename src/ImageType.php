@@ -41,12 +41,13 @@ class ImageType
         $this->type = $type;
         $this->setConfig($config);
         $this->typeConfig = $this->getTypeConfig($type);
-        $this->expirationTime = $this->getConfig()->get('expiration-time');
+        $this->expirationTime = $this->getConfig()->get('expirationTime');
 
         $this->originalFileDisk = $this->getDiskName('original');
         $this->originalDiskConfig = $this->getDiskConfig($this->originalFileDisk);
 
         $this->baseFileDisk = $this->getDiskName('base');
+        $this->baseFileSuffix = $this->enableBaseFileSuffix('base');
         $this->baseDiskConfig = $this->getDiskConfig($this->baseFileDisk);
     }
 
@@ -75,6 +76,15 @@ class ImageType
         }
 
         return $this->getConfig()->get('disk');
+    }
+
+    public function enableBaseFileSuffix(string $type)
+    {
+        if (! empty($this->typeConfig->get($type)) && array_key_exists('suffix', $this->typeConfig->get($type))) {
+            return (bool) $this->typeConfig->get($type)['suffix'];
+        }
+
+        return (bool) $this->getConfig()->get('fileSuffix');
     }
 
     public function getDiskConfig(string $fileDisk)
@@ -243,9 +253,11 @@ class ImageType
 
         $configSizes = $this->typeConfig->get('sizes');
 
-        foreach ($configSizes as $size => $dimensions) {
-            if (empty($sizes) || in_array($size, $sizes)) {
-                $urls[$size] = $defaultUrl;
+        if ($configSizes) {   
+            foreach ($configSizes as $size => $dimensions) {
+                if (empty($sizes) || in_array($size, $sizes)) {
+                    $urls[$size] = $defaultUrl;
+                }
             }
         }
 
@@ -256,7 +268,12 @@ class ImageType
     {
         if ($dimensions['extension'] === null) $dimensions['extension'] = $filename['extension'];
 
-        $output = $this->typeConfig->get('base')['path'] . '/' . $size . '/' . $filename['filename'] . '.' . $dimensions['extension'];
+        $fileSuffix = NULL;
+        if ($this->baseFileSuffix) {
+            $fileSuffix = "-{$dimensions['width']}x{$dimensions['height']}";
+        }
+
+        $output = $this->typeConfig->get('base')['path']."/{$size}/{$filename['filename']}{$fileSuffix}.{$dimensions['extension']}";
 
         $storage = Storage::disk($this->baseFileDisk);
         if ($this->baseDiskConfig['driver'] === 'local' || empty($this->baseDiskConfig['private'])) {
@@ -270,7 +287,12 @@ class ImageType
     {
         if ($dimensions['extension'] === null) $dimensions['extension'] = $filename['extension'];
 
-        $output = $this->typeConfig->get('base')['path'] . '/' . $size . '/' . $filename['filename'] . '.' . $dimensions['extension'];
+        $fileSuffix = NULL;
+        if ($this->baseFileSuffix) {
+            $fileSuffix = "-{$dimensions['width']}x{$dimensions['height']}";
+        }
+
+        $output = $this->typeConfig->get('base')['path']."/{$size}/{$filename['filename']}{$fileSuffix}.{$dimensions['extension']}";
         return Storage::disk($this->baseFileDisk)->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
     }
 }

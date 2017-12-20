@@ -26,7 +26,7 @@ return array(
     |
     */
 
-    'expiration-time' => env('IMAGERESIZER_EXPIRATION_TIME', 180),
+    'expirationTime' => env('IMAGERESIZER_EXPIRATION_TIME', 180),
 
     /*
     |--------------------------------------------------------------------------
@@ -52,7 +52,7 @@ return array(
     |
     */
 
-    'queue_name' => 'imageresizer',
+    'queueName' => 'imageresizer',
     
 
     /*
@@ -71,7 +71,7 @@ return array(
     |
     */
 
-    'dynamic_generate' => false,
+    'dynamicGenerate' => false,
 
     /*
     |--------------------------------------------------------------------------
@@ -85,7 +85,7 @@ return array(
     |
     */
 
-    'base_url' => '',
+    'baseUrl' => '',
 
     /*
     |--------------------------------------------------------------------------
@@ -99,7 +99,7 @@ return array(
     |
     */
 
-    'ignore_environments' => array(
+    'ignoreEnvironments' => array(
         'local',
     ),
 
@@ -129,6 +129,20 @@ return array(
     |
     |
     */
+
+    /*
+    |--------------------------------------------------------------------------
+    | Queue
+    |--------------------------------------------------------------------------
+    |
+    | Whether the image resized file should be with suffix
+    |
+    | Default: false
+    | Example: -100x100
+    |
+    */
+
+    'fileSuffix' => false,
 
     'types' => [
         'profile' => [
@@ -163,7 +177,7 @@ return array(
                     'stretch' => false,     // If stretch is false, then image will be fit into the dimensions
                     'extension' => null     // If extension is null, then original extension will be used, else defined extension will be given
                 ],
-                'normal' => [
+                'large' => [
                     'width' => 400,         // Give value as null, if you want to keep aspect ratio based on height
                     'height' => 400,        // Give value as null, if you want to keep aspect ratio based on width
                     'stretch' => true,      // If stretch is false, then image will be fit into the dimensions
@@ -174,7 +188,7 @@ return array(
     ],
 
 
-    'valid_extensions' => ['gif', 'jpeg', 'png', 'bmp', 'jpg'],
+    'validExtensions' => ['gif', 'jpeg', 'png', 'bmp', 'jpg'],
 
     /*
     |--------------------------------------------------------------------------
@@ -188,7 +202,7 @@ return array(
     |
     */
 
-    'append_random_characters' => true,
+    'appendRandomCharacters' => true,
 
     /*
     |--------------------------------------------------------------------------
@@ -202,6 +216,6 @@ return array(
     |
     */
 
-    'clear_invalid_uploads' => true,
+    'clearInvalidUploads' => true,
 
 );
