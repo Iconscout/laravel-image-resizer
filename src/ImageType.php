@@ -59,8 +59,10 @@ class ImageType
         }
 
         $config = $types[$key];
-        foreach ($config['sizes'] as $key => &$configSize) {
-            $configSize = array_merge($this->defaultSizeConfig, $configSize);
+        if (isset($config['sizes'])) {
+            foreach ($config['sizes'] as $key => &$configSize) {
+                $configSize = array_merge($this->defaultSizeConfig, $configSize);
+            }
         }
 
         return new Config($config);
@@ -68,7 +70,7 @@ class ImageType
 
     public function getDiskName(string $type)
     {
-        if (array_key_exists('disk', $this->typeConfig->get($type))) {
+        if (! empty($this->typeConfig->get($type)) && array_key_exists('disk', $this->typeConfig->get($type))) {
             return $this->typeConfig->get($type)['disk'];
         }
 
@@ -190,9 +192,11 @@ class ImageType
         $filename = pathinfo($filename);
         $configSizes = $this->typeConfig->get('sizes');
 
-        foreach ($configSizes as $size => $dimensions) {
-            if (empty($sizes) || in_array($size, $sizes)) {
-                $urls[$size] = $this->imageUrl($filename, $size, $dimensions);
+        if ($configSizes) {
+            foreach ($configSizes as $size => $dimensions) {
+                if (empty($sizes) || in_array($size, $sizes)) {
+                    $urls[$size] = $this->imageUrl($filename, $size, $dimensions);
+                }
             }
         }
 
@@ -216,9 +220,11 @@ class ImageType
         $filename = pathinfo($filename);
         $configSizes = $this->typeConfig->get('sizes');
 
-        foreach ($configSizes as $size => $dimensions) {
-            if (empty($sizes) || in_array($size, $sizes)) {
-                $urls[$size] = $this->temporaryImageUrl($filename, $size, $dimensions);
+        if ($configSizes) {
+            foreach ($configSizes as $size => $dimensions) {
+                if (empty($sizes) || in_array($size, $sizes)) {
+                    $urls[$size] = $this->temporaryImageUrl($filename, $size, $dimensions);
+                }
             }
         }
 
