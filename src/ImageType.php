@@ -192,7 +192,7 @@ class ImageType
             $output = $this->typeConfig->get('original')['path'] . '/' . $filename;
 
             $storage = Storage::disk($this->originalFileDisk);
-            if ($this->originalDiskConfig['driver'] === 'local' || empty($this->originalDiskConfig['private'])) {
+            if ($this->originalDiskConfig['driver'] === 'local' || empty($this->typeConfig->get('original')['private'])) {
                 $urls['original'] = $storage->url($output);
             } else {
                 $urls['original'] = $storage->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
@@ -276,7 +276,7 @@ class ImageType
         $output = $this->typeConfig->get('base')['path']."/{$size}/{$filename['filename']}{$fileSuffix}.{$dimensions['extension']}";
 
         $storage = Storage::disk($this->baseFileDisk);
-        if ($this->baseDiskConfig['driver'] === 'local' || empty($this->baseDiskConfig['private'])) {
+        if ($this->baseDiskConfig['driver'] === 'local' || empty($this->typeConfig->get('base')['private'])) {
             return $storage->url($output);
         } else {
             return $storage->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
