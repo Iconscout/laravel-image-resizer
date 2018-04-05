@@ -29,6 +29,7 @@ class ImageType
     protected $originalFileDisk;
     protected $originalDiskConfig;
     protected $defaultSizeConfig = [
+        'as' => null,
         'width' => null,
         'height' => null,
         'stretch' => false,
@@ -205,7 +206,8 @@ class ImageType
         if ($configSizes) {
             foreach ($configSizes as $size => $dimensions) {
                 if (empty($sizes) || in_array($size, $sizes)) {
-                    $urls[$size] = $this->imageUrl($filename, $size, $dimensions);
+                    $key = empty($dimensions['as']) ? $size : $dimensions['as'];
+                    $urls[$key] = $this->imageUrl($filename, $size, $dimensions);
                 }
             }
         }
@@ -233,7 +235,8 @@ class ImageType
         if ($configSizes) {
             foreach ($configSizes as $size => $dimensions) {
                 if (empty($sizes) || in_array($size, $sizes)) {
-                    $urls[$size] = $this->temporaryImageUrl($filename, $size, $dimensions);
+                    $key = empty($dimensions['as']) ? $size : $dimensions['as'];
+                    $urls[$key] = $this->temporaryImageUrl($filename, $size, $dimensions);
                 }
             }
         }
@@ -256,7 +259,8 @@ class ImageType
         if ($configSizes) {   
             foreach ($configSizes as $size => $dimensions) {
                 if (empty($sizes) || in_array($size, $sizes)) {
-                    $urls[$size] = $defaultUrl;
+                    $key = empty($dimensions['as']) ? $size : $dimensions['as'];
+                    $urls[$key] = $defaultUrl;
                 }
             }
         }
