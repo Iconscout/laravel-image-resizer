@@ -244,6 +244,24 @@ class ImageType
         return $urls;
     }
 
+    public function blob(string $filename, $size = null)
+    {
+        $output = null;
+
+        if (empty($size) || $size === 'original') {
+            $output = $this->typeConfig->get('original')['path'] . '/' . $filename;
+        } else {
+            $configSizes = $this->typeConfig->get('sizes');
+
+            if (isset($configSizes[$size])) {
+                $filename = pathinfo($filename);
+                $output = $this->output($filename, $size, $configSizes[$size]);
+            }
+        }
+
+        return $output;
+    }
+
     public function defaultUrl($sizes = [])
     {
         $urls = [];
@@ -270,16 +288,10 @@ class ImageType
 
     protected function imageUrl($filename, $size, $dimensions)
     {
-        if ($dimensions['extension'] === null) $dimensions['extension'] = $filename['extension'];
-
-        $fileSuffix = NULL;
-        if ($this->baseFileSuffix) {
-            $fileSuffix = "-{$dimensions['width']}x{$dimensions['height']}";
-        }
-
-        $output = $this->typeConfig->get('base')['path']."/{$size}/{$filename['filename']}{$fileSuffix}.{$dimensions['extension']}";
+        $output = $this->output($filename, $size, $dimensions);
 
         $storage = Storage::disk($this->baseFileDisk);
+
         if ($this->baseDiskConfig['driver'] === 'local' || empty($this->typeConfig->get('base')['private'])) {
             return $storage->url($output);
         } else {
@@ -289,14 +301,23 @@ class ImageType
 
     protected function temporaryImageUrl($filename, $size, $dimensions)
     {
+        $output = $this->output($filename, $size, $dimensions);
+
+        return Storage::disk($this->baseFileDisk)->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
+    }
+
+    protected function output($filename, $size, $dimensions)
+    {
         if ($dimensions['extension'] === null) $dimensions['extension'] = $filename['extension'];
 
         $fileSuffix = NULL;
+
         if ($this->baseFileSuffix) {
             $fileSuffix = "-{$dimensions['width']}x{$dimensions['height']}";
         }
 
         $output = $this->typeConfig->get('base')['path']."/{$size}/{$filename['filename']}{$fileSuffix}.{$dimensions['extension']}";
-        return Storage::disk($this->baseFileDisk)->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
+
+        return $output;
     }
 }
