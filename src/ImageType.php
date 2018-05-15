@@ -187,10 +187,11 @@ class ImageType
         }
         
         $urls = [];
+        $filename = pathinfo($filename);
         $this->expirationTime = empty($expirationTime) ? $this->expirationTime : $expirationTime;
 
         if (empty($sizes) || in_array('original', $sizes)) {
-            $output = $this->typeConfig->get('original')['path'] . '/' . $filename;
+            $output = $this->typeConfig->get('original')['path'] . '/' . $filename['basename'];
 
             $storage = Storage::disk($this->originalFileDisk);
             if ($this->originalDiskConfig['driver'] === 'local' || empty($this->typeConfig->get('original')['private'])) {
@@ -200,7 +201,6 @@ class ImageType
             }
         }
 
-        $filename = pathinfo($filename);
         $configSizes = $this->typeConfig->get('sizes');
 
         if ($configSizes) {
@@ -222,14 +222,14 @@ class ImageType
         }
 
         $urls = [];
+        $filename = pathinfo($filename);
         $this->expirationTime = empty($expirationTime) ? $this->expirationTime : $expirationTime;
 
         if (empty($sizes) || in_array('original', $sizes)) {
-            $output = $this->typeConfig->get('original')['path'] . '/' . $filename;
+            $output = $this->typeConfig->get('original')['path'] . '/' . $filename['basename'];
             $urls['original'] = Storage::disk($this->originalFileDisk)->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
         }
 
-        $filename = pathinfo($filename);
         $configSizes = $this->typeConfig->get('sizes');
 
         if ($configSizes) {
@@ -247,14 +247,14 @@ class ImageType
     public function blob(string $filename, $size = null)
     {
         $output = null;
+        $filename = pathinfo($filename);
 
         if (empty($size) || $size === 'original') {
-            $output = $this->typeConfig->get('original')['path'] . '/' . $filename;
+            $output = $this->typeConfig->get('original')['path'] . '/' . $filename['basename'];
         } else {
             $configSizes = $this->typeConfig->get('sizes');
 
             if (isset($configSizes[$size])) {
-                $filename = pathinfo($filename);
                 $output = $this->output($filename, $size, $configSizes[$size]);
             }
         }
