@@ -191,13 +191,15 @@ class ImageType
         $this->expirationTime = empty($expirationTime) ? $this->expirationTime : $expirationTime;
 
         if (empty($sizes) || in_array('original', $sizes)) {
-            $output = $this->typeConfig->get('original')['path'] . '/' . $filename['basename'];
+            $configOriginal = $this->typeConfig->get('original');
+            $output = $configOriginal['path'] . '/' . $filename['basename'];
+            $key = empty($configOriginal['as']) ? 'original' : $configOriginal['as'];
 
             $storage = Storage::disk($this->originalFileDisk);
-            if ($this->originalDiskConfig['driver'] === 'local' || empty($this->typeConfig->get('original')['private'])) {
-                $urls['original'] = $storage->url($output);
+            if ($this->originalDiskConfig['driver'] === 'local' || empty($configOriginal['private'])) {
+                $urls[$key] = $storage->url($output);
             } else {
-                $urls['original'] = $storage->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
+                $urls[$key] = $storage->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
             }
         }
 
@@ -226,8 +228,11 @@ class ImageType
         $this->expirationTime = empty($expirationTime) ? $this->expirationTime : $expirationTime;
 
         if (empty($sizes) || in_array('original', $sizes)) {
-            $output = $this->typeConfig->get('original')['path'] . '/' . $filename['basename'];
-            $urls['original'] = Storage::disk($this->originalFileDisk)->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
+            $configOriginal = $this->typeConfig->get('original');
+            $output = $configOriginal['path'] . '/' . $filename['basename'];
+            $key = empty($configOriginal['as']) ? 'original' : $configOriginal['as'];
+
+            $urls[$key] = Storage::disk($this->originalFileDisk)->temporaryUrl($output, Carbon::now()->addMinutes($this->expirationTime));
         }
 
         $configSizes = $this->typeConfig->get('sizes');
@@ -269,7 +274,9 @@ class ImageType
         $defaultUrl = Storage::disk('local')->url($output);
 
         if (empty($sizes) || in_array('original', $sizes)) {
-            $urls['original'] = $defaultUrl;
+            $configOriginal = $this->typeConfig->get('original');
+            $key = empty($configOriginal['as']) ? 'original' : $configOriginal['as'];
+            $urls[$key] = $defaultUrl;
         }
 
         $configSizes = $this->typeConfig->get('sizes');
@@ -310,7 +317,7 @@ class ImageType
     {
         if ($dimensions['extension'] === null) $dimensions['extension'] = $filename['extension'];
 
-        $fileSuffix = NULL;
+        $fileSuffix = null;
 
         if ($this->baseFileSuffix) {
             $fileSuffix = "-{$dimensions['width']}x{$dimensions['height']}";
